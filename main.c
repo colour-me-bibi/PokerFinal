@@ -401,10 +401,6 @@ int high_vals_cmp(Play *a, Play *b)
     counting_sort(a->high_vals, a->high_val_count, RANK_COUNT, true);
     counting_sort(b->high_vals, b->high_val_count, RANK_COUNT, true);
 
-    for (size_t i = 0; i < a->high_val_count; i++)
-        printf("%c, ", value_to_rank(a->high_vals[i]));
-    printf("\n");
-
     size_t i = 0;
     while (i < a->high_val_count && i < b->high_val_count)
     {
@@ -434,7 +430,7 @@ int play_vals_cmp(Play *a, Play *b)
     return a->play_val_count - b->play_val_count;
 }
 
-int play_cmp(Play *a, Play *b) // TODO flesh out
+int play_cmp(Play *a, Play *b)
 {
     if (a->score != b->score)
         return a->score - b->score;
@@ -481,29 +477,55 @@ int main(int argc, char const *argv[])
 
         bool player_won = play_cmp(&player_play, &other_play) > 0;
 
-        for (size_t i = 0; i < 5; i++)
-            printf("%c, ", value_to_rank(line_cards[i].value));
+        csis_printf(fp_out, "(Player) ");
 
-        printf("Score = %d, %s", player_play.score, score_to_play_string(player_play.score));
+        for (size_t i = 0; i < 4; i++)
+            csis_printf(fp_out, "%c ", value_to_rank(line_cards[i].value));
+        csis_printf(fp_out, "%c", value_to_rank(line_cards[5].value));
 
-        for (size_t i = 0; i < player_play.play_val_count; i++)
-            printf("%c, ", value_to_rank(player_play.play_vals[i]));
-        for (size_t i = 0; i < player_play.high_val_count; i++)
-            printf("%c, ", value_to_rank(player_play.high_vals[i]));
+        csis_printf(fp_out, ", Play = %s", score_to_play_string(player_play.score));
 
-        printf(" | ");
+        if (player_play.play_val_count)
+        {
+            csis_printf(fp_out, ", Play cards = ");
+            for (size_t i = 0; i < player_play.play_val_count - 1; i++)
+                csis_printf(fp_out, "%c ", value_to_rank(player_play.play_vals[i]));
+            csis_printf(fp_out, "%c", value_to_rank(player_play.play_vals[player_play.play_val_count - 1]));
+        }
 
-        for (size_t i = 5; i < 10; i++)
-            printf("%c, ", value_to_rank(line_cards[i].value));
+        if (player_play.high_val_count)
+        {
+            csis_printf(fp_out, ", High cards = ");
+            for (size_t i = 0; i < player_play.high_val_count; i++)
+                csis_printf(fp_out, "%c ", value_to_rank(player_play.high_vals[i]));
+        }
 
-        printf("Score = %d, %s", other_play.score, score_to_play_string(other_play.score));
+        csis_printf(fp_out, "\n");
 
-        for (size_t i = 0; i < other_play.play_val_count; i++)
-            printf("%c, ", value_to_rank(other_play.play_vals[i]));
-        for (size_t i = 0; i < other_play.high_val_count; i++)
-            printf("%c, ", value_to_rank(other_play.high_vals[i]));
+        csis_printf(fp_out, "(Other)  ");
 
-        printf("\n");
+        for (size_t i = 5; i < 9; i++)
+            csis_printf(fp_out, "%c ", value_to_rank(line_cards[i].value));
+        csis_printf(fp_out, "%c", value_to_rank(line_cards[10].value));
+
+        csis_printf(fp_out, ", Play = %s", score_to_play_string(other_play.score));
+
+        if (other_play.play_val_count)
+        {
+            csis_printf(fp_out, ", Play cards = ");
+            for (size_t i = 0; i < other_play.play_val_count - 1; i++)
+                csis_printf(fp_out, "%c ", value_to_rank(other_play.play_vals[i]));
+            csis_printf(fp_out, "%c", value_to_rank(other_play.play_vals[other_play.play_val_count - 1]));
+        }
+
+        if (other_play.high_val_count)
+        {
+            csis_printf(fp_out, ", High cards = ");
+            for (size_t i = 0; i < other_play.high_val_count; i++)
+                csis_printf(fp_out, "%c ", value_to_rank(other_play.high_vals[i]));
+        }
+
+        csis_printf(fp_out, "\n%s won!\n\n", player_won ? "Player" : "Other");
 
         result += player_won;
     }
